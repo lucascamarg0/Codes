@@ -3,10 +3,10 @@ package main;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class ControlIp {
-	private static final ControlIp control = new ControlIp();
+public class Control {
+	private static final Control control = new Control();
 
-	public static ControlIp getInstance() {
+	public static Control getInstance() {
 		return control;
 	}
 	
@@ -134,8 +134,22 @@ public class ControlIp {
 		return potCount;
 	}
 	
-	public String addSubnet(String maskBinary, int bits) {
+	public String addHosts(String maskBinary, int bits) {
 		
+		for (int i = 31; i >= 0; i--) {
+			if (maskBinary.charAt(i) == '0') {
+				maskBinary = maskBinary.substring(0,i)+'1'+maskBinary.substring(i+1);
+				bits = bits - 1;
+				if (bits == 0) {
+					break;
+				}
+			}
+		}
+		
+		return maskBinary;		
+	}
+	
+	public String addSubnet(String maskBinary, int bits) {
 		
 		for (int i = 0; i< 32; i++) {
 			if (maskBinary.charAt(i) == '0') {
@@ -176,13 +190,21 @@ public class ControlIp {
 		String id = binaryToAddress(bitwise);
 		text = concatTexto(text, "\nID de Rede: " + id);
 		
+		int bits = 0;
+		String customMask = "";
+		
 		if (subnet != null) {
-			int bits = borrowedBits(subnet);
-			String customMask = addSubnet(classe[2], bits);
-			customMask = binaryToAddress(customMask);
-			text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
-			text = concatTexto(text, "Borrowed Bits: " + bits);
+			bits = borrowedBits(subnet);
+			customMask = addSubnet(classe[2], bits);
 		}
+		
+		if (hosts != null) {
+			bits = borrowedBits(hosts);
+			customMask = addHosts(classe[2], bits);
+		}
+		customMask = binaryToAddress(customMask);
+		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
+		text = concatTexto(text, "Borrowed Bits: " + bits);
 		return text;
 	}
 }

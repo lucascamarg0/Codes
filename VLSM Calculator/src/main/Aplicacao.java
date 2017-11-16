@@ -12,17 +12,17 @@ import java.awt.event.MouseEvent;
 import javax.swing.JTable;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import main.ControlIp;
+import main.Control;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 
 public class Aplicacao {
 
-	private JFrame frame;
+	private JFrame frmVlsmCalculator;
 	private JTextField textField_1;
 	private JTable hosts;
 	
-	ControlIp control = ControlIp.getInstance();
+	Control control = Control.getInstance();
 
 	/**
 	 * Launch the application.
@@ -32,7 +32,7 @@ public class Aplicacao {
 			public void run() {
 				try {
 					Aplicacao window = new Aplicacao();
-					window.frame.setVisible(true);
+					window.frmVlsmCalculator.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -51,10 +51,11 @@ public class Aplicacao {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 644, 433);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+		frmVlsmCalculator = new JFrame();
+		frmVlsmCalculator.setTitle("VLSM Calculator");
+		frmVlsmCalculator.setBounds(100, 100, 748, 451);
+		frmVlsmCalculator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmVlsmCalculator.getContentPane().setLayout(null);
 		
 //		txtIpBase = new JTextField();
 		MaskFormatter F_Mascara = new MaskFormatter();
@@ -67,32 +68,34 @@ public class Aplicacao {
 		JFormattedTextField txtIpBase = new JFormattedTextField(F_Mascara);
 		
 		txtIpBase.setToolTipText("");
-		txtIpBase.setBounds(10, 11, 204, 20);
-		frame.getContentPane().add(txtIpBase);
+		txtIpBase.setBounds(10, 13, 204, 20);
+		frmVlsmCalculator.getContentPane().add(txtIpBase);
 		txtIpBase.setColumns(10);
 		
 		textField_1 = new JTextField();
-		textField_1.setBounds(10, 215, 99, 20);
-		frame.getContentPane().add(textField_1);
+		textField_1.setBounds(10, 277, 99, 20);
+		frmVlsmCalculator.getContentPane().add(textField_1);
 		textField_1.setColumns(10);
 		
 		DefaultTableModel model = new DefaultTableModel();
 		model.addColumn("Quantidade");
 		hosts = new JTable(model);
-		hosts.setBounds(10, 42, 204, 162);
-		frame.getContentPane().add(hosts);
+		hosts.setBounds(10, 44, 204, 222);
+		frmVlsmCalculator.getContentPane().add(hosts);
 
 		JSpinner spinner = new JSpinner();
-		spinner.setBounds(10, 249, 99, 20);
-		frame.getContentPane().add(spinner);
+		spinner.setBounds(10, 311, 99, 20);
+		frmVlsmCalculator.getContentPane().add(spinner);
 		
 		JSpinner spinner_1 = new JSpinner();
-		spinner_1.setBounds(10, 283, 99, 20);
-		frame.getContentPane().add(spinner_1);
+		spinner_1.setBounds(10, 345, 99, 20);
+		frmVlsmCalculator.getContentPane().add(spinner_1);
 		
 		JTextArea logUser = new JTextArea();
-		logUser.setBounds(224, 11, 394, 292);
-		frame.getContentPane().add(logUser);
+		logUser.setAutoscrolls(false);
+		logUser.setEditable(false);
+		logUser.setBounds(224, 11, 498, 390);
+		frmVlsmCalculator.getContentPane().add(logUser);
 
 		JButton btnNewButton = new JButton("Adicionar");
 		btnNewButton.addMouseListener(new MouseAdapter() {
@@ -102,8 +105,8 @@ public class Aplicacao {
 				model.addRow(new Object[]{quantidadeHost});
 			}
 		});
-		btnNewButton.setBounds(119, 214, 95, 23);
-		frame.getContentPane().add(btnNewButton);
+		btnNewButton.setBounds(119, 276, 95, 23);
+		frmVlsmCalculator.getContentPane().add(btnNewButton);
 		
 		JButton btnCalcular = new JButton("Subnet");
 		btnCalcular.addMouseListener(new MouseAdapter() {
@@ -118,8 +121,8 @@ public class Aplicacao {
 //				logUser.append(control.ipToBinary(ipBase));
 			}
 		});
-		btnCalcular.setBounds(119, 248, 95, 23);
-		frame.getContentPane().add(btnCalcular);
+		btnCalcular.setBounds(119, 310, 95, 23);
+		frmVlsmCalculator.getContentPane().add(btnCalcular);
 		
 		JButton btnCalcularPorHosts = new JButton("Hosts");
 		btnCalcularPorHosts.addActionListener(new ActionListener() {
@@ -131,8 +134,12 @@ public class Aplicacao {
 				logUser.append(ipBinary);
 			}
 		});
-		btnCalcularPorHosts.setBounds(119, 282, 95, 23);
-		frame.getContentPane().add(btnCalcularPorHosts);
+		btnCalcularPorHosts.setBounds(119, 344, 95, 23);
+		frmVlsmCalculator.getContentPane().add(btnCalcularPorHosts);
+		
+		JButton btnSubnetHosts = new JButton("Subnet e Hosts");
+		btnSubnetHosts.setBounds(10, 378, 204, 23);
+		frmVlsmCalculator.getContentPane().add(btnSubnetHosts);
 		
 		
 		
