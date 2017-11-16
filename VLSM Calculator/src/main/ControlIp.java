@@ -121,7 +121,7 @@ public class ControlIp {
 		return texto + "\n" + concat;
 	}
 	
-	public String addSubnet(String maskBinary, int subnet) {
+	public int borrowedBits(int subnet) {
 		int potencia = nextPowerOf2(subnet);
 		int potCount;
 		
@@ -131,11 +131,17 @@ public class ControlIp {
 				break;
 		}
 		
+		return potCount;
+	}
+	
+	public String addSubnet(String maskBinary, int bits) {
+		
+		
 		for (int i = 0; i< 32; i++) {
 			if (maskBinary.charAt(i) == '0') {
 				maskBinary = maskBinary.substring(0,i)+'1'+maskBinary.substring(i+1);
-				potCount = potCount - 1;
-				if (potCount == 0) {
+				bits = bits - 1;
+				if (bits == 0) {
 					break;
 				}
 			}
@@ -144,7 +150,7 @@ public class ControlIp {
 		return maskBinary;
 	}
 	
-	public String avaliaIP(String ip, Integer subnet) {
+	public String avaliaIP(String ip, Integer subnet, Integer hosts) {
 		String text = "\n";
 		
 		if (!validateAddress(ip)) {
@@ -169,11 +175,14 @@ public class ControlIp {
 
 		String id = binaryToAddress(bitwise);
 		text = concatTexto(text, "\nID de Rede: " + id);
-
-		String customMask = addSubnet(classe[2], subnet);
-		customMask = binaryToAddress(customMask);
-		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
-
+		
+		if (subnet != null) {
+			int bits = borrowedBits(subnet);
+			String customMask = addSubnet(classe[2], bits);
+			customMask = binaryToAddress(customMask);
+			text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
+			text = concatTexto(text, "Borrowed Bits: " + bits);
+		}
 		return text;
 	}
 }

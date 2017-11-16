@@ -112,7 +112,7 @@ public class Aplicacao {
 				String ipBase = txtIpBase.getText();
 				Integer subnet = (Integer) spinner.getValue();
 				
-				String ipBinary = control.avaliaIP(ipBase, subnet);
+				String ipBinary = control.avaliaIP(ipBase, subnet, null);
 				logUser.append(ipBinary);
 //				logUser.append(control.discoverClass(ipBase));
 //				logUser.append(control.ipToBinary(ipBase));
@@ -124,6 +124,11 @@ public class Aplicacao {
 		JButton btnCalcularPorHosts = new JButton("Hosts");
 		btnCalcularPorHosts.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				String ipBase = txtIpBase.getText();
+				Integer hosts = (Integer) spinner_1.getValue();
+				
+				String ipBinary = control.avaliaIP(ipBase, null, hosts);
+				logUser.append(ipBinary);
 			}
 		});
 		btnCalcularPorHosts.setBounds(119, 282, 95, 23);
