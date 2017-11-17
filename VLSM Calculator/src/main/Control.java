@@ -127,6 +127,10 @@ public class Control {
 	
 	public int borrowedBits(int subnet) {
 		int potencia = nextPowerOf2(subnet);
+
+		if (potencia == 1)
+			return potencia;
+		
 		int potCount;
 		
 		for (potCount = 1; potCount <= 16; potCount++) {
@@ -135,6 +139,7 @@ public class Control {
 				break;
 		}
 		
+//		System.out.println(potCount);
 		return potCount;
 	}
 	
@@ -183,16 +188,32 @@ public class Control {
 		return maiorPot;
 	}
 	
-	public boolean validateClass(String classe, Integer subnet, Integer hosts) {
+	public int validateClass(String classe, Integer subnet, Integer hosts) {
 		
 		if (classe.equals("A") && (subnet + hosts) <= 24) {
-			return true;
+			if (hosts == 0) {
+				return subnet;
+			}else{
+				return 24 - hosts;
+			}
+//			return true;
 		}else if (classe.equals("B") && (subnet + hosts) <= 16) {
-			return true;
-		}else if (classe.equals("A") && (subnet + hosts) <= 8) {
-			return true;
+			if (hosts == 0) {
+				return subnet;
+			}else{
+				return 16 - hosts;
+			}
+//			return true;
+		}else if (classe.equals("C") && (subnet + hosts) <= 8) {
+			if (hosts == 0) {
+				return subnet;
+			}else{
+				return 8 - hosts;
+			}
+//			return true;
 		}
-		return false;
+		return -1;
+//		return false;
 	}
 	
 	public String avaliaIP(String ip, Integer subnet, Integer hosts) {
@@ -212,49 +233,75 @@ public class Control {
 		text = concatTexto(text, ipBinary);
 		text = concatTexto(text, classe[2]);
 		
-		BigInteger b1 = new BigInteger(ipBinary, 2);
-		BigInteger b2 = new BigInteger(classe[2], 2);
+//		BigInteger b1 = new BigInteger(ipBinary, 2);
+//		BigInteger b2 = new BigInteger(classe[2], 2);
+//		String bitwise = "" + b1.and(b2).toString(2);
+//		String id = binaryToAddress(bitwise);
+//		text = concatTexto(text, "\nID de Rede: " + id);
 		
-		String bitwise = "" + b1.and(b2).toString(2);
-//		text = concatTexto(text, bitwise);
-
-		String id = binaryToAddress(bitwise);
-		text = concatTexto(text, "\nID de Rede: " + id);
-		
-		int bits = 0;
-		String customMask = "";
+		String customMaskBinary = "";
+		Integer borrowedBits = 0;
 		
 		if (hosts == null) {
-			bits = borrowedBits(subnet);
+			Integer bitsSubnet = borrowedBits(subnet);
 			
-			if (validateClass(classe[0], bits, 0)) {
-				customMask = addSubnet(classe[2], bits);
+			borrowedBits = validateClass(classe[0], bitsSubnet, 0);
+			if (borrowedBits >= 0) {
+				customMaskBinary = addSubnet(classe[2], bitsSubnet);
 			}else {
-				return "Quantidade de subnets ("+ bits+") não suportada para classe " + classe[0];
+				return "Quantidade de subnets ("+ bitsSubnet+") não suportada para classe " + classe[0];
 			}
 		}else if (subnet == null) {
-			bits = borrowedBits(hosts);
+			Integer bitsHost = borrowedBits(hosts);
 
-			if (validateClass(classe[0], 0, bits)) {
-				customMask = addHosts(classe[2], bits);
+			borrowedBits = validateClass(classe[0], 0, bitsHost);
+			if (borrowedBits >= 0) {
+				customMaskBinary = addHosts(classe[2], bitsHost);
 			}else {
-				return "Quantidade de hosts ("+ bits+") não suportada para classe " + classe[0];
+				return "Quantidade de hosts ("+ bitsHost+") não suportada para classe " + classe[0];
 			}
 		}else {
 			Integer bitsSubnet = borrowedBits(subnet);
 			Integer bitsHost = borrowedBits(hosts);
-			if (validateClass(classe[0], bitsSubnet, bitsHost)) {
-				customMask = addSubnet(classe[2], bitsSubnet);
-				customMask = addHosts(customMask, bitsHost);
+			
+			borrowedBits = validateClass(classe[0], bitsSubnet, bitsHost);
+			if (borrowedBits >= 0) {
+				customMaskBinary = addSubnet(classe[2], bitsSubnet);
+				customMaskBinary = addHosts(customMaskBinary, bitsHost);
 			}else {
 				return "Quantidade de hosts/subnet não suportada para classe " + classe[0];
 			}
 			
 		}
-		text = concatTexto(text, customMask);
-		customMask = binaryToAddress(customMask);
+		String customMask = binaryToAddress(customMaskBinary);
+		text = concatTexto(text, "Borrowed Bits: " + borrowedBits);
 		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
-		text = concatTexto(text, "Borrowed Bits: " + bits);
+		text = concatTexto(text, customMaskBinary);
+		
+		BigInteger b1 = new BigInteger(ipBinary, 2);
+		BigInteger b2 = new BigInteger(customMaskBinary, 2);
+		String bitwise = "" + b1.and(b2).toString(2);
+		String id = binaryToAddress(bitwise);
+		
+		BigInteger teste = new BigInteger("11111111111111111111111111111111", 2);
+		BigInteger testesum = BigInteger.valueOf(300L);
+		
+		testesum = b1.add(testesum);
+		
+		System.out.println(b1);
+		System.out.println(testesum);
+		
+//		Integer ipinteiro = Integer.parseInt(ipBinary, 2);
+//		System.out.println(Integer.parseInt(ipBinary, 2));
+		
+//		String sumip = Integer.toBinaryString(ipinteiro + 2);
+//		System.out.println(sumip);
+		
+		System.out.println(binaryToAddress("" + testesum.and(teste).toString(2)));
+		System.out.println(testesum.and(teste).toString(2));
+		
+		text = concatTexto(text, "\nID de Rede: " + id);
+		
 		return text;
 	}
 }

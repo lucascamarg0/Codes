@@ -1,7 +1,10 @@
 package main;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 import javax.swing.JButton;
@@ -39,11 +42,30 @@ public class Aplicacao {
 			}
 		});
 	}
+	
+	private static void defineLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Create the application.
 	 */
 	public Aplicacao() {
+		
 		initialize();
 	}
 
@@ -51,6 +73,9 @@ public class Aplicacao {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		defineLookAndFeel();
+		
 		frmVlsmCalculator = new JFrame();
 		frmVlsmCalculator.setTitle("VLSM Calculator");
 		frmVlsmCalculator.setBounds(100, 100, 748, 451);
@@ -81,9 +106,21 @@ public class Aplicacao {
 		model.addColumn("Quantidade");
 		model.addColumn("Quantidade + 2");
 		model.addColumn("ProxPotencia");
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 44, 204, 222);
+		frmVlsmCalculator.getContentPane().add(scrollPane);
 		hosts = new JTable(model);
-		hosts.setBounds(10, 44, 204, 222);
-		frmVlsmCalculator.getContentPane().add(hosts);
+		scrollPane.setViewportView(hosts);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(224, 13, 498, 388);
+		frmVlsmCalculator.getContentPane().add(scrollPane_1);
+		
+		JTextArea logUser = new JTextArea();
+		scrollPane_1.setViewportView(logUser);
+		logUser.setAutoscrolls(false);
+		logUser.setEditable(false);
 
 		JSpinner spinner = new JSpinner();
 		spinner.setBounds(10, 311, 99, 20);
@@ -92,12 +129,6 @@ public class Aplicacao {
 		JSpinner spinner_1 = new JSpinner();
 		spinner_1.setBounds(10, 345, 99, 20);
 		frmVlsmCalculator.getContentPane().add(spinner_1);
-		
-		JTextArea logUser = new JTextArea();
-		logUser.setAutoscrolls(false);
-		logUser.setEditable(false);
-		logUser.setBounds(224, 11, 498, 390);
-		frmVlsmCalculator.getContentPane().add(logUser);
 
 		JButton btnNewButton = new JButton("Adicionar");
 		btnNewButton.addMouseListener(new MouseAdapter() {
@@ -119,8 +150,7 @@ public class Aplicacao {
 				Integer subnet = (Integer) spinner.getValue();
 				
 				String ipBinary = control.avaliaIP(ipBase, subnet, null);
-				logUser.setText("");
-				logUser.append(ipBinary);
+				logUser.append(ipBinary + "\n");
 			}
 		});
 		btnCalcular.setBounds(119, 310, 95, 23);
@@ -133,8 +163,8 @@ public class Aplicacao {
 				Integer hosts = (Integer) spinner_1.getValue();
 				
 				String ipBinary = control.avaliaIP(ipBase, null, hosts);
-				logUser.setText("");
-				logUser.append(ipBinary);
+//				logUser.setText("");
+				logUser.append(ipBinary + "\n");
 			}
 		});
 		btnCalcularPorHosts.setBounds(119, 344, 95, 23);
@@ -149,12 +179,13 @@ public class Aplicacao {
 				Integer subnet = model.getRowCount();
 				
 				String ipBinary = control.avaliaIP(ipBase, subnet, hosts);
-				logUser.setText("");
-				logUser.append(ipBinary);
+//				logUser.setText("");
+				logUser.append(ipBinary + "\n");
 			}
 		});
 		btnSubnetHosts.setBounds(10, 378, 204, 23);
 		frmVlsmCalculator.getContentPane().add(btnSubnetHosts);
+		
 		
 		
 		
