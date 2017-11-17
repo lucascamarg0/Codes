@@ -188,6 +188,22 @@ public class Control {
 		return maiorPot;
 	}
 	
+	public String addHostsToIp(String ipBinary, long hosts) {
+		
+		BigInteger mascaraTeste = new BigInteger("11111111111111111111111111111111", 2); //Mascara 255.255.255.255 para não modificar IP
+		BigInteger ipInt = new BigInteger(ipBinary, 2); //IP que será adicionado
+		BigInteger novoIpInt = BigInteger.valueOf(hosts); //Número de hosts que será somado
+		
+		novoIpInt = ipInt.add(novoIpInt); //Soma entre dois BigInteger (IP + Hosts)
+		String bitwiseNovo = novoIpInt.and(mascaraTeste).toString(2); //Bitwise entre máscara e IP + hosts
+		String proxIp = binaryToAddress(bitwiseNovo); //Novo IP binário para IP em base 10
+		
+//		System.out.println(ip);
+//		System.out.println(proxIp);
+		
+		return proxIp;
+	}
+	
 	public int validateClass(String classe, Integer subnet, Integer hosts) {
 		
 		if (classe.equals("A") && (subnet + hosts) <= 24) {
@@ -196,24 +212,20 @@ public class Control {
 			}else{
 				return 24 - hosts;
 			}
-//			return true;
 		}else if (classe.equals("B") && (subnet + hosts) <= 16) {
 			if (hosts == 0) {
 				return subnet;
 			}else{
 				return 16 - hosts;
 			}
-//			return true;
 		}else if (classe.equals("C") && (subnet + hosts) <= 8) {
 			if (hosts == 0) {
 				return subnet;
 			}else{
 				return 8 - hosts;
 			}
-//			return true;
 		}
 		return -1;
-//		return false;
 	}
 	
 	public String avaliaIP(String ip, Integer subnet, Integer hosts) {
@@ -233,6 +245,7 @@ public class Control {
 		text = concatTexto(text, ipBinary);
 		text = concatTexto(text, classe[2]);
 		
+		/* CASO O ID SEJA CALCULADO SOBRE DEFAULT SUBNET MASK */		
 //		BigInteger b1 = new BigInteger(ipBinary, 2);
 //		BigInteger b2 = new BigInteger(classe[2], 2);
 //		String bitwise = "" + b1.and(b2).toString(2);
@@ -278,27 +291,13 @@ public class Control {
 		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
 		text = concatTexto(text, customMaskBinary);
 		
+		/* CASO O ID SEJA CALCULADO SOBRE CUSTOM SUBNET MASK */		
 		BigInteger b1 = new BigInteger(ipBinary, 2);
 		BigInteger b2 = new BigInteger(customMaskBinary, 2);
 		String bitwise = "" + b1.and(b2).toString(2);
 		String id = binaryToAddress(bitwise);
 		
-		BigInteger teste = new BigInteger("11111111111111111111111111111111", 2);
-		BigInteger testesum = BigInteger.valueOf(300L);
-		
-		testesum = b1.add(testesum);
-		
-		System.out.println(b1);
-		System.out.println(testesum);
-		
-//		Integer ipinteiro = Integer.parseInt(ipBinary, 2);
-//		System.out.println(Integer.parseInt(ipBinary, 2));
-		
-//		String sumip = Integer.toBinaryString(ipinteiro + 2);
-//		System.out.println(sumip);
-		
-		System.out.println(binaryToAddress("" + testesum.and(teste).toString(2)));
-		System.out.println(testesum.and(teste).toString(2));
+		System.out.println(addHostsToIp(ipBinary, 64));
 		
 		text = concatTexto(text, "\nID de Rede: " + id);
 		
