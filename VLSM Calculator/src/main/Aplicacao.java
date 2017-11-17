@@ -79,6 +79,8 @@ public class Aplicacao {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		model.addColumn("Quantidade");
+		model.addColumn("Quantidade + 2");
+		model.addColumn("ProxPotencia");
 		hosts = new JTable(model);
 		hosts.setBounds(10, 44, 204, 222);
 		frmVlsmCalculator.getContentPane().add(hosts);
@@ -102,7 +104,8 @@ public class Aplicacao {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String quantidadeHost = textField_1.getText();
-				model.addRow(new Object[]{quantidadeHost});
+				int hostMais2 = Integer.parseInt(quantidadeHost) + 2;
+				model.addRow(new Object[]{quantidadeHost, hostMais2, control.nextPowerOf2(hostMais2)});
 			}
 		});
 		btnNewButton.setBounds(119, 276, 95, 23);
@@ -116,9 +119,8 @@ public class Aplicacao {
 				Integer subnet = (Integer) spinner.getValue();
 				
 				String ipBinary = control.avaliaIP(ipBase, subnet, null);
+				logUser.setText("");
 				logUser.append(ipBinary);
-//				logUser.append(control.discoverClass(ipBase));
-//				logUser.append(control.ipToBinary(ipBase));
 			}
 		});
 		btnCalcular.setBounds(119, 310, 95, 23);
@@ -131,6 +133,7 @@ public class Aplicacao {
 				Integer hosts = (Integer) spinner_1.getValue();
 				
 				String ipBinary = control.avaliaIP(ipBase, null, hosts);
+				logUser.setText("");
 				logUser.append(ipBinary);
 			}
 		});
@@ -138,6 +141,18 @@ public class Aplicacao {
 		frmVlsmCalculator.getContentPane().add(btnCalcularPorHosts);
 		
 		JButton btnSubnetHosts = new JButton("Subnet e Hosts");
+		btnSubnetHosts.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				String ipBase = txtIpBase.getText();
+				Integer hosts = control.maiorPotencia(model);
+				Integer subnet = model.getRowCount();
+				
+				String ipBinary = control.avaliaIP(ipBase, subnet, hosts);
+				logUser.setText("");
+				logUser.append(ipBinary);
+			}
+		});
 		btnSubnetHosts.setBounds(10, 378, 204, 23);
 		frmVlsmCalculator.getContentPane().add(btnSubnetHosts);
 		

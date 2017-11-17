@@ -3,6 +3,8 @@ package main;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import javax.swing.table.DefaultTableModel;
+
 public class Control {
 	private static final Control control = new Control();
 
@@ -65,7 +67,7 @@ public class Control {
 		ArrayList<String> strings = new ArrayList<String>();
 		int index = 0;
 		while (index < binary.length()) {
-		    strings.add(binary.substring(index, Math.min(index + 8,binary.length())));
+			strings.add(binary.substring(index, Math.min(index + 8,binary.length())));
 		    index += 8;
 		}
 		
@@ -94,12 +96,14 @@ public class Control {
 		return octeto1 + octeto2 + octeto3 + octeto4;
 	}
 	
-	public static int nextPowerOf2(final int a){
+	public int nextPowerOf2(final int a){
 		int b = 1;
 		while (b < a)
 		{
 		    b = b << 1;
 		}
+		
+//		int b = (int) Math.pow(2, Math.ceil(Math.log(a)) / Math.log(2));
 		return b;
     }
 	
@@ -138,10 +142,11 @@ public class Control {
 		
 		for (int i = 31; i >= 0; i--) {
 			if (maskBinary.charAt(i) == '0') {
-				maskBinary = maskBinary.substring(0,i)+'1'+maskBinary.substring(i+1);
-				bits = bits - 1;
-				if (bits == 0) {
-					break;
+				if (bits > 0) {
+					maskBinary = maskBinary.substring(0,i)+'0'+maskBinary.substring(i+1);
+					bits = bits - 1;
+				}else{
+					maskBinary = maskBinary.substring(0,i)+'1'+maskBinary.substring(i+1);
 				}
 			}
 		}
@@ -162,6 +167,32 @@ public class Control {
 		}
 		
 		return maskBinary;
+	}
+	
+	public int maiorPotencia(DefaultTableModel maior) {
+		int maiorPot = 0;
+		
+		for (int i = 0; i < maior.getRowCount(); i++) {
+			if (i == 0) {
+				maiorPot = (int) maior.getValueAt(i, 2);
+			}else if(maiorPot < (int) maior.getValueAt(i, 2)) {
+				maiorPot = (int) maior.getValueAt(i, 2);
+			}
+		}
+		
+		return maiorPot;
+	}
+	
+	public boolean validateClass(String classe, Integer subnet, Integer hosts) {
+		
+		if (classe.equals("A") && (subnet + hosts) <= 24) {
+			return true;
+		}else if (classe.equals("B") && (subnet + hosts) <= 16) {
+			return true;
+		}else if (classe.equals("A") && (subnet + hosts) <= 8) {
+			return true;
+		}
+		return false;
 	}
 	
 	public String avaliaIP(String ip, Integer subnet, Integer hosts) {
@@ -193,15 +224,34 @@ public class Control {
 		int bits = 0;
 		String customMask = "";
 		
-		if (subnet != null) {
+		if (hosts == null) {
 			bits = borrowedBits(subnet);
-			customMask = addSubnet(classe[2], bits);
-		}
-		
-		if (hosts != null) {
+			
+			if (validateClass(classe[0], bits, 0)) {
+				customMask = addSubnet(classe[2], bits);
+			}else {
+				return "Quantidade de subnets ("+ bits+") não suportada para classe " + classe[0];
+			}
+		}else if (subnet == null) {
 			bits = borrowedBits(hosts);
-			customMask = addHosts(classe[2], bits);
+
+			if (validateClass(classe[0], 0, bits)) {
+				customMask = addHosts(classe[2], bits);
+			}else {
+				return "Quantidade de hosts ("+ bits+") não suportada para classe " + classe[0];
+			}
+		}else {
+			Integer bitsSubnet = borrowedBits(subnet);
+			Integer bitsHost = borrowedBits(hosts);
+			if (validateClass(classe[0], bitsSubnet, bitsHost)) {
+				customMask = addSubnet(classe[2], bitsSubnet);
+				customMask = addHosts(customMask, bitsHost);
+			}else {
+				return "Quantidade de hosts/subnet não suportada para classe " + classe[0];
+			}
+			
 		}
+		text = concatTexto(text, customMask);
 		customMask = binaryToAddress(customMask);
 		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
 		text = concatTexto(text, "Borrowed Bits: " + bits);
