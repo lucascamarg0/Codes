@@ -2,6 +2,7 @@ package main;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -12,31 +13,6 @@ public class Control {
 		return control;
 	}
 	
-//	public String discoverClass(String ip) {
-//		String classe = "IP Classe ";
-//		String[] ipParts = ip.split("\\.");
-//		Integer octeto1 = Integer.parseInt(ipParts[0]);
-//		
-//		if (octeto1 >= 1 && octeto1 <= 127) {
-//			classe = classe + "A"
-//					+ "\nPrivate Address Space: 10.0.0.0 to 10.255.255.255"
-//					+ "\nDefault Subnet Mask: 255.0.0.0";
-//		}else if(octeto1 >= 128 && octeto1 <= 191) {
-//			classe = classe + "B"
-//					+ "\nPrivate Address Space: 172.16.0.0 to 172.31.255.255"
-//					+ "\nDefault Subnet Mask: 255.255.0.0";
-//		}else if(octeto1 >= 192 && octeto1 <= 223) {
-//			classe = classe + "C"
-//					+ "\nPrivate Address Space: 192.168.0.0 to 192.168.255.255"
-//					+ "\nDefault Subnet Mask: 255.255.255.0";
-//		}else if(octeto1 >= 224 && octeto1 <= 239) {
-//			classe = classe + "D";
-//		}else {
-//			classe = classe + "E";
-//		}
-//		
-//		return classe;
-//	}
 	public String[] discoverClass(String ip) {
 		String[] classe = new String[3];
 		String[] ipParts = ip.split("\\.");
@@ -64,7 +40,7 @@ public class Control {
 	
 	public String binaryToAddress(String binary) {
 		
-		ArrayList<String> strings = new ArrayList<String>();
+		List<String> strings = new ArrayList<String>();
 		int index = 0;
 		while (index < binary.length()) {
 			strings.add(binary.substring(index, Math.min(index + 8,binary.length())));
@@ -97,18 +73,16 @@ public class Control {
 	}
 	
 	public int nextPowerOf2(final int a){
-		int b = 1;
-		while (b < a)
-		{
-		    b = b << 1;
-		}
-		
-//		int b = (int) Math.pow(2, Math.ceil(Math.log(a)) / Math.log(2));
+		int b = (int) Math.pow(2, Math.ceil(Math.log(a) / Math.log(2)));
 		return b;
     }
 	
+	public int borrowedBits(int subnet) {
+		int potCount = (int) Math.ceil(Math.log(subnet) / Math.log(2));
+		return potCount;
+	}
+	
 	public boolean validateAddress(String address) {
-		
 		String[] addressParts = address.split("\\.");
 
 		if (Integer.parseInt(addressParts[0]) > 255 ||
@@ -121,30 +95,11 @@ public class Control {
 	}
 
 	public String concatTexto(String texto, String concat) {
-		
 		return texto + "\n" + concat;
 	}
 	
-	public int borrowedBits(int subnet) {
-		int potencia = nextPowerOf2(subnet);
-
-		if (potencia == 1)
-			return potencia;
-		
-		int potCount;
-		
-		for (potCount = 1; potCount <= 16; potCount++) {
-			potencia = potencia / 2;
-			if (potencia == 1)
-				break;
-		}
-		
-//		System.out.println(potCount);
-		return potCount;
-	}
 	
 	public String addHosts(String maskBinary, int bits) {
-		
 		for (int i = 31; i >= 0; i--) {
 			if (maskBinary.charAt(i) == '0') {
 				if (bits > 0) {
@@ -160,7 +115,6 @@ public class Control {
 	}
 	
 	public String addSubnet(String maskBinary, int bits) {
-		
 		for (int i = 0; i< 32; i++) {
 			if (maskBinary.charAt(i) == '0') {
 				maskBinary = maskBinary.substring(0,i)+'1'+maskBinary.substring(i+1);
@@ -177,10 +131,9 @@ public class Control {
 	public int maiorPotencia(DefaultTableModel maior) {
 		int maiorPot = 0;
 		
+		maiorPot = (int) maior.getValueAt(0, 2);
 		for (int i = 0; i < maior.getRowCount(); i++) {
-			if (i == 0) {
-				maiorPot = (int) maior.getValueAt(i, 2);
-			}else if(maiorPot < (int) maior.getValueAt(i, 2)) {
+			if(maiorPot < (int) maior.getValueAt(i, 2)) {
 				maiorPot = (int) maior.getValueAt(i, 2);
 			}
 		}
@@ -190,16 +143,12 @@ public class Control {
 	
 	public String addHostsToIp(String ipBinary, long hosts) {
 		
-		BigInteger mascaraTeste = new BigInteger("11111111111111111111111111111111", 2); //Mascara 255.255.255.255 para não modificar IP
 		BigInteger ipInt = new BigInteger(ipBinary, 2); //IP que será adicionado
 		BigInteger novoIpInt = BigInteger.valueOf(hosts); //Número de hosts que será somado
 		
 		novoIpInt = ipInt.add(novoIpInt); //Soma entre dois BigInteger (IP + Hosts)
-		String bitwiseNovo = novoIpInt.and(mascaraTeste).toString(2); //Bitwise entre máscara e IP + hosts
+		String bitwiseNovo = String.format("%32s", novoIpInt.toString(2)).replace(' ', '0'); //Bitwise entre máscara e IP + hosts
 		String proxIp = binaryToAddress(bitwiseNovo); //Novo IP binário para IP em base 10
-		
-//		System.out.println(ip);
-//		System.out.println(proxIp);
 		
 		return proxIp;
 	}
@@ -228,6 +177,36 @@ public class Control {
 		return -1;
 	}
 	
+	public String distributeIp(String ipBase, int host, int qtdSubnet) {
+		List<String> idRede = new ArrayList<String>();
+		List<String> broadcast = new ArrayList<String>();
+		
+//		System.out.println(ipBase);
+		idRede.add(binaryToAddress(ipBase));
+		broadcast.add(addHostsToIp(ipBase, host-1));
+//		String text = "\nSubnet 0 " + idRede.get(0) + " Broadcast: " + broadcast.get(0);
+		String text = "\nSubnet 0 " + idRede.get(0);
+		text = concatTexto(text, addressToBinary(idRede.get(0)));
+		text = concatTexto(text, "Broadcast: " + broadcast.get(0));
+		text = concatTexto(text, addressToBinary(broadcast.get(0)));
+		
+		for(int i = 1; i < qtdSubnet; i++) {
+			idRede.add(addHostsToIp(addressToBinary(broadcast.get(i-1)),1));
+			broadcast.add(addHostsToIp(addressToBinary(broadcast.get(i-1)), host));
+//			text = concatTexto(text, "Subnet " + i + " " + idRede.get(i) + " Broadcast: " + broadcast.get(i));
+			text = concatTexto(text, "\nSubnet " + i + " " + idRede.get(i));
+			text = concatTexto(text, addressToBinary(idRede.get(i)));
+			text = concatTexto(text, "Broadcast: " + broadcast.get(i));
+			text = concatTexto(text, addressToBinary(broadcast.get(i)));
+		}
+//		List<String> idRede = new ArrayList<String>;
+//		List<String> idRede = new ArrayList<String>;
+		
+		
+		
+		return text;
+	} 
+	
 	public String avaliaIP(String ip, Integer subnet, Integer hosts) {
 		String text = "\n";
 		
@@ -245,15 +224,15 @@ public class Control {
 		text = concatTexto(text, ipBinary);
 		text = concatTexto(text, classe[2]);
 		
-		/* CASO O ID SEJA CALCULADO SOBRE DEFAULT SUBNET MASK */		
-//		BigInteger b1 = new BigInteger(ipBinary, 2);
-//		BigInteger b2 = new BigInteger(classe[2], 2);
-//		String bitwise = "" + b1.and(b2).toString(2);
-//		String id = binaryToAddress(bitwise);
-//		text = concatTexto(text, "\nID de Rede: " + id);
+		BigInteger b1 = new BigInteger(ipBinary, 2);
+		BigInteger b2 = new BigInteger(classe[2], 2); //CASO O ID SEJA CALCULADO SOBRE DEFAULT SUBNET MASK
+		String bitwise = String.format("%32s", b1.and(b2).toString(2)).replace(' ', '0');
+		String id = binaryToAddress(bitwise);
+		text = concatTexto(text, "\nID de Rede: " + id);
 		
 		String customMaskBinary = "";
 		Integer borrowedBits = 0;
+		String distIps = "";
 		
 		if (hosts == null) {
 			Integer bitsSubnet = borrowedBits(subnet);
@@ -281,6 +260,7 @@ public class Control {
 			if (borrowedBits >= 0) {
 				customMaskBinary = addSubnet(classe[2], bitsSubnet);
 				customMaskBinary = addHosts(customMaskBinary, bitsHost);
+				distIps = distributeIp(bitwise, hosts, subnet);
 			}else {
 				return "Quantidade de hosts/subnet não suportada para classe " + classe[0];
 			}
@@ -290,16 +270,16 @@ public class Control {
 		text = concatTexto(text, "Borrowed Bits: " + borrowedBits);
 		text = concatTexto(text, "\nCustom Subnet Mask: " + customMask);
 		text = concatTexto(text, customMaskBinary);
+		text = concatTexto(text, distIps);
 		
-		/* CASO O ID SEJA CALCULADO SOBRE CUSTOM SUBNET MASK */		
-		BigInteger b1 = new BigInteger(ipBinary, 2);
-		BigInteger b2 = new BigInteger(customMaskBinary, 2);
-		String bitwise = "" + b1.and(b2).toString(2);
-		String id = binaryToAddress(bitwise);
+//		BigInteger b1 = new BigInteger(ipBinary, 2);
+//		BigInteger b2 = new BigInteger(classe[2], 2); //CASO O ID SEJA CALCULADO SOBRE DEFAULT SUBNET MASK
+//		BigInteger b2 = new BigInteger(customMaskBinary, 2); //CASO O ID SEJA CALCULADO SOBRE CUSTOM SUBNET MASK
+//		String bitwise = String.format("%32s", b1.and(b2).toString(2)).replace(' ', '0');
+//		String id = binaryToAddress(bitwise);
+//		text = concatTexto(text, "\nID de Rede: " + id);
 		
-		System.out.println(addHostsToIp(ipBinary, 64));
-		
-		text = concatTexto(text, "\nID de Rede: " + id);
+//		distributeIp(bitwise, 64, 5);
 		
 		return text;
 	}

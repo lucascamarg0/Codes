@@ -82,7 +82,6 @@ public class Aplicacao {
 		frmVlsmCalculator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmVlsmCalculator.getContentPane().setLayout(null);
 		
-//		txtIpBase = new JTextField();
 		MaskFormatter F_Mascara = new MaskFormatter();
 		try {
 			F_Mascara.setMask("###.###.###.###"); // Atribui a mascara
